@@ -1,0 +1,17 @@
+{
+	"name": "hcscadf1",
+	"properties": {
+		"globalParameters": {
+			"globalschemaname": {
+				"type": "string",
+				"value": "salesLT"
+			}
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "1d99f4ae-068f-4a8a-b73e-69c0ddf184e5",
+		"tenantId": "a334a5a4-550b-4b7b-ac27-7812da70e135"
+	}
+}

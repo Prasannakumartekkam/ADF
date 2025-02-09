@@ -1,0 +1,26 @@
+{
+	"name": "schedular_trigger",
+	"properties": {
+		"description": "this is to run the piplelines on a shedule basis",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "foreachpipeline",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 2,
+				"startTime": "2025-02-07T14:55:00",
+				"endTime": "2025-02-08T05:03:08",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}

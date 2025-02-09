@@ -1,0 +1,174 @@
+{
+	"name": "set_with_multiple_cloumns",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set variablestart time",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "start_time",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get Metadatacustomer exists",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Set variablestart time",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "generic_table_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "salesLT",
+							"table": "Customer"
+						}
+					},
+					"fieldList": [
+						"exists"
+					]
+				}
+			},
+			{
+				"name": "Set variableend time",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Metadatacustomer exists",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "end_time",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Copy customer data",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set variableend time",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"additionalColumns": [
+							{
+								"name": "start_time_stamp",
+								"value": {
+									"value": "@variables('start_time')",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "end_time_stamp",
+								"value": {
+									"value": "@variables('end_time')",
+									"type": "Expression"
+								}
+							}
+						],
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "generic_table_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "salesLT",
+							"table": "Customer"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "generic_lake_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderpath": "adding_new_cloumns_to_customer"
+						}
+					}
+				]
+			}
+		],
+		"variables": {
+			"start_time": {
+				"type": "String"
+			},
+			"end_time": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-02-07T06:42:58Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

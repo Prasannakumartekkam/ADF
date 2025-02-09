@@ -1,0 +1,142 @@
+{
+	"name": "incremental data load from  sql to adls",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup water mark file",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "watermark_ds",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Lookup customer max date",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Lookup water mark file",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select max(ModifiedDate) as max_modified_dt from [SalesLT].[Customer]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "customer_ds",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Copy incremental customer data",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Lookup customer max date",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "@concat('select * from salesLT.customer where modifieddate>''',activity('Lookup water mark file').output.firstRow.prop_0,'''and modifieddate<''',activity('Lookup customer max date').output.firstRow.max_modified_dt'''')",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "generic_table_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "salesLT",
+							"table": "Customer"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "generic_lake_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderpath": "incremental_customer_data_load"
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-02-08T09:19:46Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

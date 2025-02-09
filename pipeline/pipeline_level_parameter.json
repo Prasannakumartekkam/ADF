@@ -1,0 +1,77 @@
+{
+	"name": "pipeline_level_parameter",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy datausing pipeline parameters",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "generic_table_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "salesLT",
+							"table": {
+								"value": "@pipeline().parameters.Tableentity",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "generic_lake_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderpath": "pipeline_parameter"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"Tableentity": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-02-07T08:36:51Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
