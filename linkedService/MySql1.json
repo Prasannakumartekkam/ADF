@@ -1,0 +1,22 @@
+{
+	"name": "MySql1",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "MySql",
+		"typeProperties": {
+			"server": "LAPTOP-MQIB7G12\\SQLEXPRESS",
+			"port": 3306,
+			"database": "prasannakumar",
+			"username": "prasanna",
+			"sslMode": 1,
+			"useSystemTrustStore": 1,
+			"driverVersion": "v2",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwNGVhMmI5NC1hNDkzLTQyMDgtOWEzZC1lNTAyY2Y3NzRkOTIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "integrationRuntime1",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
